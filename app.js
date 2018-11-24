@@ -891,6 +891,18 @@ new Vue({
                             .bindPopup(popup);
                     }
                 });
+            },
+            addCurrentLocation() {
+                var redMarker = L.AwesomeMarkers.icon({
+                    icon: 'coffee',
+                    markerColor: 'red'
+                });
+                      
+                // L.marker([51.941196,4.512291], {icon: redMarker}).addTo(map);
+                navigator.geolocation.getCurrentPosition((position) => {
+                    L.marker([position.coords.latitude,position.coords.longitude], {icon: redMarker})
+                        .addTo(this.map);
+                });
             }
         } 
   });
