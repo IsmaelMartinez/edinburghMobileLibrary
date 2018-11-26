@@ -872,7 +872,11 @@ new Vue({
       },
       methods: {
         loadMap() {
-                this.map = L.map('map').setView([55.953251, -3.188267], 11);
+                this.map = L.map('map',{
+                  fullscreenControl: {
+                    pseudoFullscreen: false // if true, fullscreen to page width and height
+                }
+                }).setView([55.953251, -3.188267], 11);
                 this.tileLayer = L.tileLayer(
                 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
                 {
@@ -894,20 +898,9 @@ new Vue({
                 });
             },
             addCurrentLocation() {
-                var greenIcon = new L.Icon({
-                    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                  });
-                //   
-                //   L.marker([51.5, -0.09], {icon: greenIcon}).addTo(map);
-                      
-                // L.marker([51.941196,4.512291], {icon: redMarker}).addTo(map);
+                var pulsingIcon = L.icon.pulse({iconSize:[8,8],color:'red'});
                 navigator.geolocation.getCurrentPosition((position) => {
-                    L.marker([position.coords.latitude,position.coords.longitude], {icon: greenIcon})
+                    L.marker([position.coords.latitude,position.coords.longitude], {icon: pulsingIcon})
                         .addTo(this.map);
                 });
             }
