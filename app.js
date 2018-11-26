@@ -873,9 +873,7 @@ new Vue({
       methods: {
         loadMap() {
                 this.map = L.map('map',{
-                  fullscreenControl: {
-                    pseudoFullscreen: false // if true, fullscreen to page width and height
-                }
+                  fullscreenControl: true
                 }).setView([55.953251, -3.188267], 11);
                 this.tileLayer = L.tileLayer(
                 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
