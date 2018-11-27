@@ -867,7 +867,7 @@ new Vue({
       },
       mounted() {
         this.loadMap();
-        // this.setCurrentLocation();
+        this.setCurrentLocation();
       },
       methods: {
         loadMap() {
