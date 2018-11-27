@@ -866,12 +866,20 @@ new Vue({
         ]
       },
       mounted() {
-        this.loadMap(this.generateMarkers());
+        this.loadMap();
         this.setCurrentLocation();
       },
       methods: {
-        loadMap(mobileLibraries) {
-          // _.keys(mobileLibraries).forEach(key => mobileLibraries[key]);
+        loadMap() {
+          this.setMarkersForMobileLibraries();
+          this.defineMap();
+          this.loadTileLayer();
+          this.addControlLayers();
+        },
+        addControlLayers() {
+          L.control.layers( {}, this.mobileLibraries, {colapsed: false}).addTo(this.map);
+        },
+        loadTileLayer() {
           this.tileLayer = L.tileLayer(
             'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
             {
@@ -879,52 +887,57 @@ new Vue({
               attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
             }
           );
+          this.tileLayer.addTo(this.map);
+        },
+        defineMap() {
           this.map = L.map('map',{
             fullscreenControl: true,
             center: [55.953251, -3.188267],
             zoom: 11,
-            layers: _.flatMap(mobileLibraries)  
+            layers: _.flatMap(this.mobileLibraries)  
           });
-          this.tileLayer.addTo(this.map);
-          
-          L.control.layers({
-            },mobileLibraries, {colapsed: false, sortLayers: true}).addTo(this.map);
         },
-        generateMarkers () {
+        setMarkersForMobileLibraries () {
+          this.mobileLibraries = this.getMarkersFromObjectGroupOrderedByWeekDay(_.groupBy(this.layers, "Day"));
+        },
+        getMarkersFromObjectGroupOrderedByWeekDay(layers) {
           let markers = {};
-          let grouped = _.groupBy(this.layers, "Day");
-          _.keys(grouped).forEach(key => {
+
+          _.keys(layers).forEach(key => {
             let values = [];
-            grouped[key].forEach(
+            layers[key].forEach(
               el => {
               if (el['Location']){
-                let popup = el['Name'];
-                if (el['Address']) popup = popup + "<br> " + el['Address'];
-                popup = popup + "<br> "+el['Day'] + " "+el['Time'];
-                values.push(L.marker(el['Location'].split(','))
-                  .bindPopup(popup));
+                values.push(this.generateMarker(el));
               }
             });
             markers[key] = L.layerGroup(values);
           });
+          
+          return this.orderObjectByWeekDay(markers);
+        },
+        generateMarker(el) {
+          let popup = el['Name'];
+          if (el['Address']) popup = popup + "<br> " + el['Address'];
+          popup = popup + "<br> "+el['Day'] + " "+el['Time'];
+          return L.marker(el['Location'].split(','))
+                  .bindPopup(popup);
+        },
+        orderObjectByWeekDay(objectToOrder) {
+          const sorter = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+          let orderedObject = {};
 
-          // this.layers.forEach(el => {
-          //   if (el['Location']){
-          //     let popup = el['Name'];
-          //     if (el['Address']) popup = popup + "<br> " + el['Address'];
-          //     popup = popup + "<br> "+el['Day'] + " "+el['Time'];
-          //     markers.push(L.marker(el['Location'].split(','))
-          //       .bindPopup(popup));
-          //   }
-          // });
-          return markers;
+          sorter.forEach((dayOfWeek) => {
+            orderedObject[dayOfWeek] = objectToOrder[dayOfWeek];
+          });
+
+          return orderedObject;
         },
         setCurrentLocation() {
           var pulsingIcon = L.icon.pulse({iconSize:[8,8],color:'red'});
           navigator.geolocation.getCurrentPosition((position) => {
             L.marker([position.coords.latitude,position.coords.longitude], {icon: pulsingIcon})
               .addTo(this.map);
-          
           });
         }
       } 
