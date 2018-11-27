@@ -867,17 +867,25 @@ new Vue({
       },
       mounted() {
         this.loadMap();
-        this.setCurrentLocation();
+        // this.setCurrentLocation();
       },
       methods: {
         loadMap() {
-          this.setMarkersForMobileLibraries();
           this.defineMap();
           this.loadTileLayer();
+          this.setMarkersForMobileLibraries();
           this.addControlLayers();
         },
         addControlLayers() {
-          L.control.layers( {}, this.mobileLibraries, {collapsed: false}).addTo(this.map);
+          this.controlLayers = L.control.layers(null, null, {collapsed: false});
+          this.markers = L.markerClusterGroup();
+          this.markers.addTo(this.map);
+          _.keys(this.mobileLibraries).forEach((key) => {
+            let group = L.featureGroup.subGroup(this.markers, this.mobileLibraries[key]);
+            this.controlLayers.addOverlay( group, key);
+            group.addTo(this.map)
+          })
+          this.controlLayers.addTo(this.map);
         },
         loadTileLayer() {
           this.tileLayer = L.tileLayer(
@@ -893,8 +901,7 @@ new Vue({
           this.map = L.map('map',{
             fullscreenControl: true,
             center: [55.953251, -3.188267],
-            zoom: 11,
-            layers: _.flatMap(this.mobileLibraries)  
+            zoom: 12  
           });
         },
         setMarkersForMobileLibraries () {
@@ -911,7 +918,7 @@ new Vue({
                 values.push(this.generateMarker(el));
               }
             });
-            markers[key] = L.layerGroup(values);
+            markers[key] =  values;
           });
           
           return this.orderObjectByWeekDay(markers);
