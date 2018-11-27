@@ -877,7 +877,7 @@ new Vue({
           this.addControlLayers();
         },
         addControlLayers() {
-          L.control.layers( {}, this.mobileLibraries, {colapsed: false}).addTo(this.map);
+          L.control.layers( {}, this.mobileLibraries, {collapsed: false}).addTo(this.map);
         },
         loadTileLayer() {
           this.tileLayer = L.tileLayer(
